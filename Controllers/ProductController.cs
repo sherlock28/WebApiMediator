@@ -5,6 +5,7 @@ using WebApiMediator.Features.Products.Queries.List;
 using WebApiMediator.Features.Products.Commands.Create;
 using WebApiMediator.Features.Products.Commands.Delete;
 using WebApiMediator.Features.Products.Commands.Update;
+using WebApiMediator.Features.Products.Notifications;
 
 namespace WebApiMediator.Controllers;
 
@@ -35,10 +36,11 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost("", Name = "CreateProduct")]
-    public async Task<IActionResult> CreateProduct(CreateProductCommand command, [FromServices] ISender mediatr)
+    public async Task<IActionResult> CreateProduct(CreateProductCommand command, [FromServices] IMediator mediatr)
     {
         var productId = await mediatr.Send(command);
         if (Guid.Empty == productId) return BadRequest();
+		await mediatr.Publish(new ProductCreatedNotification(productId));
         return Created($"/products/{productId}", new { id = productId });
     }
 
