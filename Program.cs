@@ -1,4 +1,5 @@
 using System.Reflection;
+using WebApiMediator.Behaviors;
 using WebApiMediator.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,11 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>();
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+    cfg.AddOpenBehavior(typeof(RequestResponseLoggingBehavior<,>));
+});
 
 var app = builder.Build();
 
