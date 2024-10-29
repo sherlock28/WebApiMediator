@@ -1,5 +1,7 @@
 using System.Reflection;
+using FluentValidation;
 using WebApiMediator.Behaviors;
+using WebApiMediator.Exceptions;
 using WebApiMediator.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +19,12 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
     cfg.AddOpenBehavior(typeof(RequestResponseLoggingBehavior<,>));
+	cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
 });
+builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -27,6 +34,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
